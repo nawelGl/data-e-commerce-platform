@@ -2,16 +2,13 @@ package com.episen.ms_product.application.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.episen.ms_product.application.dto.ProductRequestDTO;
 import com.episen.ms_product.application.dto.ProductResponseDTO;
 import com.episen.ms_product.application.mapper.ProductMapper;
 import com.episen.ms_product.domain.entity.Product;
 import com.episen.ms_product.domain.repository.ProductRepository;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +66,7 @@ public class ProductService {
 
     /**
      * Crée un nouveau produit
-     * (Pas besoin de faire +1 au stock car on créé un modle de produit : stock est à entrer par l'user)
+     * (Pas besoin de faire +1 au stock car on créé un modle de produit : stock est à entrer par l'utilisateur)
      */
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
@@ -97,4 +94,73 @@ public class ProductService {
         return productMapper.toDto(savedProduct);
     }
     
+    /**
+     * Met à jour un produit existant
+     */
+    @Transactional
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
+        log.debug("Mise à jour du produit avec l'ID: {}", id);
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+
+        // Vérifier si le nouveau nom de produit existe déjà (sauf si c'est le même)
+        if (!product.getName().equals(productRequestDTO.getName())
+                && productRepository.existsByName(productRequestDTO.getName())) {
+            log.warn("Tentative de mise à jour avec un nom de produit existant: {}", productRequestDTO.getName());
+            throw new ResourceAlreadyExistsException("Product", "name", productRequestDTO.getName());
+        }
+
+        productMapper.updateEntityFromDto(productRequestDTO, product);
+        Product updatedProduct = productRepository.save(product);
+
+        // Métrique personnalisée
+        Counter.builder("products.updated")
+                .description("Nombre de produits mis à jour")
+                .tag("type", "product")
+                .register(meterRegistry)
+                .increment();
+
+        log.info("Produit mis à jour avec succès: ID={}, Name={}",
+                updatedProduct.getId(), updatedProduct.getName());
+
+        return productMapper.toDto(updatedProduct);
+    }
+
+    /**
+     * Supprime un produit
+     */
+    @Transactional
+    public void deleteProduct(Long id) {
+        log.debug("Suppression du produit avec l'ID: {}", id);
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+
+        productRepository.delete(product);
+
+        // Métrique personnalisée
+        Counter.builder("products.deleted")
+                .description("Nombre de produits supprimés")
+                .tag("type", "product")
+                .register(meterRegistry)
+                .increment();
+
+        log.info("Produit supprimé avec succès: ID={}, Name={}", id, product.getName());
+    }
+
+    /**
+     * Recherche des produits par nom
+     */
+    public List<ProductResponseDTO> searchProductByName(String name) {
+        log.debug("Recherche de produit avec le nom: {}", name);
+
+        List<Product> products = productRepository.searchByName(name);
+
+        log.info("Nombre de produits trouvés: {}", products.size());
+
+        return products.stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

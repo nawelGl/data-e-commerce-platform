@@ -3,6 +3,7 @@ package com.episen.ms_product.domain.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.episen.ms_product.domain.entity.Product;
 
@@ -25,6 +26,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * Recherche un produit par nom (méthode de re quête dérivée)
      */
     Optional<Product> findByName(String name);
+    //Trop strict pour une recherche, créer une requete en plus pour la recherche.
+
+    /**
+     * Recherche des utilisateurs par nom (insensible à la casse)
+     */
+    @Query("SELECT u FROM Product u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Product> searchByName(String name);
 
     /**
      * Filtrer les produits par catégorie (méthode de re quête dérivée)
