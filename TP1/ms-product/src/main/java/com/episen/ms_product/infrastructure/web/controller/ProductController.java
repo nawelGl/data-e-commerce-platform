@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.episen.ms_product.application.dto.ProductRequestDTO;
 import com.episen.ms_product.application.dto.ProductResponseDTO;
 import com.episen.ms_product.application.service.ProductService;
+import com.episen.ms_product.domain.entity.ProductCategory;
 
 import java.net.URI;
 import java.util.List;
@@ -190,4 +191,47 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * GET /api/v1/products/search?name={name}
+     * Recherche des produits par nom
+     * 
+     * @param name Le nom à rechercher
+     * @return Liste des produits correspondants
+     */
+    @Operation(summary = "Rechercher des produits par nom", description = "Recherche des produits dont le nom contient la chaîne spécifiée")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recherche effectuée avec succès", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProductResponseDTO.class)))
+    })
+    @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ProductResponseDTO>> searchProducts(
+            @Parameter(description = "Nom du produit à rechercher", required = true) @RequestParam String name) {
+
+        log.info("GET /api/v1/products/search?name={} - Recherche de produits", name);
+
+        List<ProductResponseDTO> products = productService.searchProductByName(name);
+
+        return ResponseEntity.ok(products);
+    }
+
+    /**
+     * GET /api/v1/products/category/{category}
+     * Recherche des produits par catégorie
+     * 
+     * @param category La catégorie à rechercher
+     * @return Liste des produits correspondants
+     */
+    @Operation(summary = "Rechercher des produits par cat&gorie", description = "Recherche des produits dont la catégorie équivaut à la chaîne spécifiée")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recherche effectuée avec succès", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProductResponseDTO.class)))
+    })
+    @GetMapping(value = "/category", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ProductResponseDTO>> searchProductsByCategory(
+            @Parameter(description = "Catégorie du produit à rechercher", required = true) @RequestParam ProductCategory category) {
+
+        log.info("GET /api/v1/products/category/{category} - Recherche de produits", category);
+
+        List<ProductResponseDTO> products = productService.filterProductByCategory(category);
+
+        return ResponseEntity.ok(products);
+    }
 }
