@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: orders
+    version: 1.0.0
+
+  datasource:
+    url: jdbc:h2:mem:orderdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: ${APP_PORT:8083}
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+  metrics:
+    enable:
+      jvm: true
+      process: true
+      system: true
+      http: true
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Microservice commandes
+    version: ${spring.application.version}
+
+logging:
+  level:
+    root: INFO
+    com.episen.order: DEBUG
