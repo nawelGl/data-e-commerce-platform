@@ -226,9 +226,10 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Recherche effectuée avec succès", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProductResponseDTO.class)))
     })
-    @GetMapping(value = "/category", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/category/{category}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ProductResponseDTO>> searchProductsByCategory(
-            @Parameter(description = "Catégorie du produit à rechercher", required = true) @RequestParam ProductCategory category) {
+            @Parameter(description = "Catégorie du produit à rechercher", required = true)
+            @PathVariable ProductCategory category) {
 
         log.info("GET /api/v1/products/category/{category} - Recherche de produits", category);
 
@@ -258,7 +259,7 @@ public class ProductController {
     }
 
     /**
-     * PUT /api/v1/products/{id}/stock
+     * PATCH /api/v1/products/{id}/stock
      * Met à jour le stock d'un produit existant
      * 
      * @param id       L'identifiant du produit
@@ -271,12 +272,12 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content),
             @ApiResponse(responseCode = "404", description = "Produit non trouvé", content = @Content),
     })
-    @PutMapping(value = "/{id}/stock", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{id}/stock", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProductResponseDTO> updateProductStock(
             @PathVariable Long id,
             @Valid @RequestBody StockUpdateDTO stockUpdateDTO) {
 
-        log.info("PUT /api/v1/products/{}/stock - Nouveau stock : {}", id, stockUpdateDTO.getNewStock());
+        log.info("PATCH /api/v1/products/{}/stock - Nouveau stock : {}", id, stockUpdateDTO.getNewStock());
 
         ProductResponseDTO updatedProduct = productService.updateStock(id, stockUpdateDTO.getNewStock());
 
