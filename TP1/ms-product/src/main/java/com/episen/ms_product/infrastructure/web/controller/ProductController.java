@@ -17,7 +17,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.episen.ms_product.application.dto.ProductRequestDTO;
 import com.episen.ms_product.application.dto.ProductResponseDTO;
+import com.episen.ms_product.application.dto.StockUpdateDTO;
 import com.episen.ms_product.application.service.ProductService;
+import com.episen.ms_product.domain.entity.Product;
 import com.episen.ms_product.domain.entity.ProductCategory;
 
 import java.net.URI;
@@ -220,7 +222,7 @@ public class ProductController {
      * @param category La catégorie à rechercher
      * @return Liste des produits correspondants
      */
-    @Operation(summary = "Rechercher des produits par cat&gorie", description = "Recherche des produits dont la catégorie équivaut à la chaîne spécifiée")
+    @Operation(summary = "Rechercher des produits par catégorie", description = "Recherche des produits dont la catégorie équivaut à la chaîne spécifiée")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Recherche effectuée avec succès", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProductResponseDTO.class)))
     })
@@ -233,5 +235,51 @@ public class ProductController {
         List<ProductResponseDTO> products = productService.filterProductByCategory(category);
 
         return ResponseEntity.ok(products);
+    }
+
+    /**
+     * GET /api/v1/products/available
+     * Recherche des produits en stock
+     * 
+     * @return Liste des produits en stock
+     */
+    @Operation(summary = "Rechercher des produits en stock", description = "Recherche des produits en stock (stock > 0)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recherche effectuée avec succès", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProductResponseDTO.class)))
+    })
+    @GetMapping(value = "/available", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ProductResponseDTO>> searchAvailableProducts() {
+
+        log.info("GET /api/v1/products/available - Recherche de produits");
+
+        List<ProductResponseDTO> products = productService.searchAvailableProducts();
+
+        return ResponseEntity.ok(products);
+    }
+
+    /**
+     * PUT /api/v1/products/{id}/stock
+     * Met à jour le stock d'un produit existant
+     * 
+     * @param id       L'identifiant du produit
+     * @param newStock Les nouveau stock du produit
+     * @return Le produit mis à jour avec code 200 OK
+     */
+    @Operation(summary = "Mettre à jour le stock d'un produit", description = "Met à jour le stock d'un produit existant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Produit mis à jour avec succès", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProductResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Produit non trouvé", content = @Content),
+    })
+    @PutMapping(value = "/{id}/stock", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ProductResponseDTO> updateProductStock(
+            @PathVariable Long id,
+            @Valid @RequestBody StockUpdateDTO stockUpdateDTO) {
+
+        log.info("PUT /api/v1/products/{}/stock - Nouveau stock : {}", id, stockUpdateDTO.getNewStock());
+
+        ProductResponseDTO updatedProduct = productService.updateStock(id, stockUpdateDTO.getNewStock());
+
+        return ResponseEntity.ok(updatedProduct);
     }
 }
