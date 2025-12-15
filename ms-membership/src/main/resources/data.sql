@@ -11,3 +11,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP
 );
 
+-- Insertion des utilisateurs initiaux
+INSERT INTO users (first_name, last_name, email, active, created_at, updated_at)
+VALUES
+('Alice', 'Dupont', 'alice.dupont@example.com', TRUE, CURRENT_TIMESTAMP, NULL),
+('Bob', 'Martin', 'bob.martin@example.com', TRUE, CURRENT_TIMESTAMP, NULL),
+('Charlie', 'Durand', 'charlie.durand@example.com', TRUE, CURRENT_TIMESTAMP, NULL);
