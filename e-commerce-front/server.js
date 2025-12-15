@@ -103,9 +103,11 @@ app.get("/api/orders", async (req, res) => {
 app.post("/api/orders", async (req, res) => {
   try {
     const r = await axios.post(`${API.order}/api/v1/orders`, req.body);
-    res.json(r.data);
+    res.status(r.status).json(r.data);
   } catch (e) {
-    res.status(400).json({ error: "Order creation failed (user/product/stock/service down)" });
+    const status = e.response?.status || 503;
+    const data = e.response?.data || { code: "ORDER_SERVICE_UNAVAILABLE", message: "Order service down" };
+    res.status(status).json(data);
   }
 });
 
