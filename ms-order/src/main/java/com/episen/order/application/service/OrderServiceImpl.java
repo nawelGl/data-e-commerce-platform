@@ -25,6 +25,8 @@ import com.episen.order.infrastructure.exception.OrderNotModifiableException;
 import com.episen.order.infrastructure.metrics.OrderMetrics;
 
 import com.episen.order.application.dto.UpdateOrderStatusRequestDto;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -62,8 +64,12 @@ public class OrderServiceImpl implements OrderService {
         UserDto user;
         try {
             user = userClient.getUserById(request.getUserId());
-        } catch (RestClientException ex) {
-            log.error("Erreur lors de l'appel au service User pour userId={}", request.getUserId(), ex);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new UserNotFoundException(request.getUserId());
+            }
+            throw new ServiceUnavailableException("USER_SERVICE");
+        } catch (RestClientException e) {
             throw new ServiceUnavailableException("USER_SERVICE");
         }
 
@@ -92,8 +98,12 @@ public class OrderServiceImpl implements OrderService {
     ProductDto product;
     try {
         product = productClient.getProductById(itemDto.getProductId());
-        } catch (RestClientException ex) {
-        log.error("Erreur lors de l'appel au service Product pour productId={}", itemDto.getProductId(), ex);
+    } catch (HttpClientErrorException e) {
+        if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+            throw new ProductNotFoundException(itemDto.getProductId());
+        }
+        throw new ServiceUnavailableException("PRODUCT_SERVICE");
+    } catch (RestClientException e) {
         throw new ServiceUnavailableException("PRODUCT_SERVICE");
     }
 
