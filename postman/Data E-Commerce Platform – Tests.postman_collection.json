@@ -4,8 +4,8 @@
 		"name": "Data E-Commerce Platform – Tests",
 		"description": "Collection de tests Postman pour la plateforme e-commerce microservices.  \nInclut les scénarios happy path, erreurs et tests d’API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "34979795",
-		"_collection_link": "https://epigreen.postman.co/workspace/cc050dac-ba4b-48dc-92b2-b967821ef0bb/collection/34979854-e21d2f52-9026-45c5-88f0-89dea091ba79?action=share&source=collection_link&creator=34979795"
+		"_exporter_id": "34979854",
+		"_collection_link": "https://epigreen.postman.co/workspace/cc050dac-ba4b-48dc-92b2-b967821ef0bb/collection/34979854-e21d2f52-9026-45c5-88f0-89dea091ba79?action=share&source=collection_link&creator=34979854"
 	},
 	"item": [
 		{
@@ -439,14 +439,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "Scenario minimal",
-			"item": []
-		},
-		{
-			"name": "Health Checks",
-			"item": []
 		},
 		{
 			"name": "Scenario d'erreur",
